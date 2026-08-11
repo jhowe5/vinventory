@@ -34,7 +34,7 @@ export async function initDb() {
       vintage TEXT DEFAULT '',
       varietal TEXT DEFAULT '',
       region TEXT DEFAULT '',
-      natural BOOLEAN DEFAULT false,
+      is_natural BOOLEAN DEFAULT false,
       tasting_notes TEXT DEFAULT '',
       price_range TEXT DEFAULT '',
       instagram_handle TEXT DEFAULT '',
