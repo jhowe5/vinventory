@@ -17,8 +17,12 @@ Respond with ONLY a JSON object as the very last part of your reply, no markdown
 {"producer":"","wineName":"","vintage":"","varietal":"","region":"","natural":true,"tastingNotes":"","priceRange":""}
 If a field can't be determined, use an empty string.`;
     const blocks = await callClaude({ imageBase64, imageMediaType, textPrompt: prompt, useWebSearch: true });
-    const parsed = extractJSON(getResponseText(blocks));
-    if (!parsed) return res.status(502).json({ error: "Could not read that label. Try a clearer photo." });
+    const text = getResponseText(blocks);
+    const parsed = extractJSON(text);
+    if (!parsed) {
+      console.error("Could not parse /identify response. Raw text was:\n", text);
+      return res.status(502).json({ error: "Could not read that label. Try a clearer photo." });
+    }
     res.json(parsed);
   } catch (err) {
     console.error(err);
@@ -35,7 +39,9 @@ wineAiRouter.post("/instagram", async (req, res) => {
 Only answer if you're confident it's their real account — leave it blank rather than guess.
 Respond with ONLY a JSON object, no markdown fences: {"instagramHandle":""} (handle without the @, empty string if not found or not confident).`;
     const blocks = await callClaude({ textPrompt: prompt, useWebSearch: true });
-    const parsed = extractJSON(getResponseText(blocks));
+    const text = getResponseText(blocks);
+    const parsed = extractJSON(text);
+    if (!parsed) console.error("Could not parse /instagram response. Raw text was:\n", text);
     const handle = (parsed && parsed.instagramHandle ? parsed.instagramHandle : "").replace(/^@/, "").trim();
     res.json({ instagramHandle: handle });
   } catch (err) {
@@ -56,7 +62,11 @@ Use web search to suggest 5 wines they'd likely enjoy. Prioritize natural / low-
 Respond with ONLY a JSON array as the last part of your reply, no markdown fences, in exactly this shape:
 [{"wineName":"","producer":"","region":"","varietal":"","natural":true,"reason":""}]`;
     const blocks = await callClaude({ textPrompt: prompt, useWebSearch: true });
-    const parsed = extractJSON(getResponseText(blocks));
+    const text = getResponseText(blocks);
+    const parsed = extractJSON(text);
+    if (!parsed) {
+      console.error("Could not parse /suggestions response. Raw text was:\n", text);
+    }
     res.json(Array.isArray(parsed) ? parsed : []);
   } catch (err) {
     console.error(err);

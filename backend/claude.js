@@ -18,7 +18,10 @@ export async function callClaude({ imageBase64, imageMediaType, textPrompt, useW
 
   const body = {
     model: MODEL,
-    max_tokens: 1024,
+    // Generous budget: with web search running, the model can burn a good
+    // chunk of tokens on search calls before it ever writes the final
+    // answer. Too small a budget here silently truncates that answer.
+    max_tokens: 2048,
     messages: [{ role: "user", content: userContent }],
   };
   if (useWebSearch) {
