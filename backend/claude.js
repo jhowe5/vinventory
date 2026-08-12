@@ -57,7 +57,10 @@ export function getResponseText(contentBlocks) {
 
 // Pulls JSON out of a block of text, preferring the LAST { } or [ ] pair
 // (the final answer usually comes after any reasoning/search summary text).
-export function extractJSON(rawText) {
+// Pass expectArray for endpoints whose answer is a JSON array — otherwise
+// the object-matching attempts (tried first) can grab just the last
+// element of the array, since that's valid JSON all on its own.
+export function extractJSON(rawText, { expectArray = false } = {}) {
   const text = rawText.replace(/```json/g, "").replace(/```/g, "");
 
   function tryRange(openChar, closeChar, useFirst) {
@@ -71,11 +74,13 @@ export function extractJSON(rawText) {
     }
   }
 
-  return (
-    tryRange("{", "}", false) ||
-    tryRange("{", "}", true) ||
-    tryRange("[", "]", false) ||
-    tryRange("[", "]", true) ||
-    null
-  );
+  const objectAttempts = [() => tryRange("{", "}", false), () => tryRange("{", "}", true)];
+  const arrayAttempts = [() => tryRange("[", "]", false), () => tryRange("[", "]", true)];
+  const attempts = expectArray ? [...arrayAttempts, ...objectAttempts] : [...objectAttempts, ...arrayAttempts];
+
+  for (const attempt of attempts) {
+    const result = attempt();
+    if (result !== null) return result;
+  }
+  return null;
 }

@@ -64,8 +64,8 @@ Respond with ONLY a JSON array, no markdown fences, no prose before or after it,
 [{"wineName":"","producer":"","region":"","varietal":"","natural":true,"reason":""}]`;
     const blocks = await callClaude({ textPrompt: prompt, useWebSearch: true });
     const text = getResponseText(blocks);
-    const parsed = extractJSON(text);
-    if (!parsed) {
+    const parsed = extractJSON(text, { expectArray: true });
+    if (!Array.isArray(parsed)) {
       console.error("Could not parse /suggestions response. Raw text was:\n", text);
     }
     res.json(Array.isArray(parsed) ? parsed : []);
