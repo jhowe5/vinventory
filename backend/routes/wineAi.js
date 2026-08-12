@@ -59,7 +59,8 @@ wineAiRouter.post("/suggestions", async (req, res) => {
       .join("; ");
     const prompt = `Here are wines this person rated highly: ${likedList || "no ratings yet — they are just starting to explore natural wine"}.
 Use web search to suggest 5 wines they'd likely enjoy. Prioritize natural / low-intervention producers, but you can include a couple of excellent conventional wines too if genuinely similar in style.
-Respond with ONLY a JSON array as the last part of your reply, no markdown fences, in exactly this shape:
+Do not write any explanatory text, analysis, or commentary outside the JSON — go straight from searching to the answer.
+Respond with ONLY a JSON array, no markdown fences, no prose before or after it, in exactly this shape:
 [{"wineName":"","producer":"","region":"","varietal":"","natural":true,"reason":""}]`;
     const blocks = await callClaude({ textPrompt: prompt, useWebSearch: true });
     const text = getResponseText(blocks);
