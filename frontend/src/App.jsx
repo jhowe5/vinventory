@@ -20,6 +20,17 @@ const COLORS = {
   gold: "#B5862F",
   clay: "#B9A184",
   line: "#DCD2BA",
+  neutralLine: "#DCD5D8",
+};
+
+// Each tab gets its own soft, muted background wash — burgundy stays the
+// one constant accent color (buttons, badges, headline color) rather than
+// being the background everywhere.
+const TAB_THEME = {
+  scan: { bg: "#E7E3EF", bgDim: "#DCD6E8", line: "#D3CCE0" },
+  cellar: { bg: "#F2E6DC", bgDim: "#E9D7C7", line: "#E1CDB8" },
+  ratings: { bg: "#E2E8DA", bgDim: "#D5DECA", line: "#C9D6BC" },
+  suggestions: { bg: "#F1E7D0", bgDim: "#E9D9B4", line: "#DFCB98" },
 };
 
 const FONT_IMPORT = `
@@ -33,8 +44,8 @@ const GLOBAL_CSS = `
   background: linear-gradient(180deg, #8A2547, ${COLORS.wineDark});
   color: ${COLORS.cream};
   border: none;
-  border-radius: 10px;
-  padding: 12px 22px;
+  border-radius: 14px;
+  padding: 13px 24px;
   font-size: 14px;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
@@ -54,7 +65,7 @@ const GLOBAL_CSS = `
   background: transparent;
   border: 1.5px solid ${COLORS.wine};
   color: ${COLORS.wine};
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 9px 16px;
   font-size: 13px;
   font-weight: 600;
@@ -78,15 +89,16 @@ const GLOBAL_CSS = `
   transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 .card-surface:hover {
-  box-shadow: 0 6px 20px rgba(34,16,22,0.08);
+  box-shadow: 0 10px 28px rgba(34,16,22,0.08);
+  transform: translateY(-1px);
 }
 
 .dropzone {
   position: relative;
   border: 1.5px dashed ${COLORS.clay};
-  border-radius: 18px;
+  border-radius: 26px;
   background: ${COLORS.cream};
-  padding: 40px 24px;
+  padding: 44px 24px;
   text-align: center;
   cursor: pointer;
   overflow: hidden;
@@ -107,25 +119,44 @@ const GLOBAL_CSS = `
 
 .btn-ghost.danger { border-color: ${COLORS.wineDark}; color: ${COLORS.wineDark}; }
 .btn-ghost.danger:hover { background: ${COLORS.wineDark}; color: ${COLORS.cream}; }
-.btn-ghost.small { padding: 6px 12px; font-size: 12px; border-radius: 7px; }
+.btn-ghost.small { padding: 7px 14px; font-size: 12px; border-radius: 10px; }
 
 .chip {
-  padding: 6px 14px; border-radius: 999px; border: 1.5px solid ${COLORS.wine};
-  background: transparent; color: ${COLORS.wine};
+  padding: 7px 16px; border-radius: 999px; border: 1.5px solid ${COLORS.neutralLine};
+  background: rgba(255,255,255,0.5); color: ${COLORS.ink};
   font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif;
-  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
-.chip:hover { box-shadow: 0 2px 8px rgba(122,31,61,0.15); }
-.chip.active { background: ${COLORS.wine}; color: ${COLORS.cream}; }
+.chip:hover { border-color: ${COLORS.wine}; }
+.chip.active { background: ${COLORS.wine}; color: ${COLORS.cream}; border-color: ${COLORS.wine}; }
 
 .empty-state {
   border: 1.5px dashed ${COLORS.clay};
-  border-radius: 16px;
-  padding: 30px 20px;
+  border-radius: 22px;
+  padding: 32px 20px;
   text-align: center;
   color: ${COLORS.inkSoft};
   font-size: 14px;
-  background: rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.4);
+}
+
+.search-pill {
+  position: relative;
+  width: 100%;
+}
+.search-pill input {
+  width: 100%; box-sizing: border-box; padding: 13px 16px 13px 44px;
+  border-radius: 999px; border: 1.5px solid ${COLORS.neutralLine};
+  font-size: 14px; font-family: 'Inter', sans-serif; background: #fff; color: ${COLORS.ink};
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.search-pill input:focus {
+  outline: none; border-color: ${COLORS.wine};
+  box-shadow: 0 0 0 3px rgba(122,31,61,0.12);
+}
+.search-pill svg {
+  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  pointer-events: none;
 }
 
 input[type="checkbox"] { accent-color: ${COLORS.wine}; width: 16px; height: 16px; cursor: pointer; }
@@ -232,7 +263,7 @@ function AuthScreen({ onLoggedIn }) {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: `radial-gradient(circle at 20% 0%, ${COLORS.paperDim}, ${COLORS.paper} 60%)`, color: COLORS.ink, fontFamily: "'Inter', system-ui, sans-serif", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+    <div style={{ minHeight: "100vh", background: `radial-gradient(circle at 20% 0%, ${TAB_THEME.scan.bgDim}, ${TAB_THEME.scan.bg} 60%)`, color: COLORS.ink, fontFamily: "'Inter', system-ui, sans-serif", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <style>{FONT_IMPORT + GLOBAL_CSS}</style>
       <div style={{ width: "100%", maxWidth: 360 }}>
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 6 }}>
@@ -244,7 +275,7 @@ function AuthScreen({ onLoggedIn }) {
         <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: COLORS.inkSoft, textAlign: "center", margin: "0 0 28px" }}>
           every bottle, every note
         </p>
-        <form onSubmit={handleSubmit} className="card-surface" style={{ background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: 22, boxShadow: "0 4px 16px rgba(34,16,22,0.06)" }}>
+        <form onSubmit={handleSubmit} className="card-surface" style={{ background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 20, padding: 22, boxShadow: "0 4px 16px rgba(34,16,22,0.06)" }}>
           <div style={{ marginBottom: 12 }}>
             <label style={labelStyle}>Email</label>
             <input className="field" type="email" required value={emailInput} onChange={(e) => setEmailInput(e.target.value)} style={inputStyle} />
@@ -320,10 +351,16 @@ function CellarApp({ email, onLogout }) {
     }
   }
 
+  const theme = TAB_THEME[activeTab] || TAB_THEME.scan;
+
   return (
-    <div style={{ minHeight: "100vh", background: `radial-gradient(circle at 15% 0%, ${COLORS.paperDim}, ${COLORS.paper} 55%)`, color: COLORS.ink, fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div style={{
+      minHeight: "100vh", color: COLORS.ink, fontFamily: "'Inter', system-ui, sans-serif",
+      background: `radial-gradient(circle at 15% 0%, ${theme.bgDim}, ${theme.bg} 55%)`,
+      transition: "background 0.3s ease",
+    }}>
       <style>{FONT_IMPORT + GLOBAL_CSS}</style>
-      <Header activeTab={activeTab} setActiveTab={setActiveTab} email={email} onLogout={onLogout} />
+      <Header activeTab={activeTab} setActiveTab={setActiveTab} email={email} onLogout={onLogout} theme={theme} />
       <main style={{ maxWidth: 720, margin: "0 auto", padding: "24px 16px 64px" }}>
         {loadError && (
           <div style={{ background: "#FDF2F0", border: `1px solid ${COLORS.wine}`, color: COLORS.wineDark, padding: "10px 14px", borderRadius: 10, marginBottom: 16, fontSize: 14 }}>
@@ -355,7 +392,7 @@ function CellarApp({ email, onLogout }) {
   );
 }
 
-function Header({ activeTab, setActiveTab, email, onLogout }) {
+function Header({ activeTab, setActiveTab, email, onLogout, theme }) {
   const tabs = [
     { id: "scan", label: "Scan" },
     { id: "cellar", label: "Cellar" },
@@ -363,7 +400,11 @@ function Header({ activeTab, setActiveTab, email, onLogout }) {
     { id: "suggestions", label: "For You" },
   ];
   return (
-    <header style={{ background: COLORS.paper, boxShadow: `0 1px 0 ${COLORS.line}, 0 4px 12px rgba(34,16,22,0.04)`, position: "sticky", top: 0, zIndex: 10 }}>
+    <header style={{
+      background: "rgba(255,255,255,0.6)", backdropFilter: "blur(14px)", WebkitBackdropFilter: "blur(14px)",
+      boxShadow: `0 1px 0 ${theme.line}, 0 4px 20px rgba(34,16,22,0.05)`, position: "sticky", top: 0, zIndex: 10,
+      transition: "box-shadow 0.3s ease",
+    }}>
       <div style={{ maxWidth: 720, margin: "0 auto", padding: "18px 16px 0" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -503,7 +544,7 @@ function ScanTab({ onAdd }) {
 
   return (
     <div>
-      <SectionTitle>Add a bottle</SectionTitle>
+      <HeroTitle subtitle="We'll read the label, or you can enter it yourself.">Add a bottle</HeroTitle>
       <input
         ref={fileInputRef}
         type="file"
@@ -535,7 +576,7 @@ function ScanTab({ onAdd }) {
 
       {imagePreview && (
         <div className="card-surface" style={{
-          position: "relative", borderRadius: 14, overflow: "hidden",
+          position: "relative", borderRadius: 20, overflow: "hidden",
           border: `1px solid ${COLORS.line}`, boxShadow: "0 4px 16px rgba(34,16,22,0.08)", marginBottom: 16,
           background: COLORS.paperDim, display: "flex", justifyContent: "center",
         }}>
@@ -561,7 +602,7 @@ function ScanTab({ onAdd }) {
         </p>
       )}
       {(status === "done" || status === "save-error") && draft && (
-        <div className="card-surface" style={{ marginTop: 20, background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: 18 }}>
+        <div className="card-surface" style={{ marginTop: 20, background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 20, padding: 18 }}>
           <SectionTitle small>Review before saving</SectionTitle>
           <DraftForm draft={draft} setDraft={setDraft} instaLoading={instaStatus === "looking"} />
           {status === "save-error" && (
@@ -586,7 +627,7 @@ function ScanTab({ onAdd }) {
             Enter a bottle manually
           </button>
           {draft && !imageBase64 && (
-            <div className="card-surface" style={{ marginTop: 16, background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: 18, textAlign: "left" }}>
+            <div className="card-surface" style={{ marginTop: 16, background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 20, padding: 18, textAlign: "left" }}>
               <DraftForm draft={draft} setDraft={setDraft} />
               <button onClick={saveDraft} disabled={saving} className="btn-primary" style={{ marginTop: 12 }}>
                 {saving ? "Saving…" : "Add to cellar"}
@@ -682,14 +723,18 @@ function CellarTab({ bottles, onUpdate, onDelete }) {
 
   return (
     <div>
-      <SectionTitle>Your cellar · {bottles.length} bottle{bottles.length === 1 ? "" : "s"}</SectionTitle>
-      <input
-        className="field"
-        placeholder="Search producer, wine, region…"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        style={{ ...inputStyle, marginBottom: 10 }}
-      />
+      <HeroTitle>Your cellar</HeroTitle>
+      <p style={{ fontSize: 13, color: COLORS.inkSoft, margin: "-16px 0 16px" }}>
+        {bottles.length} bottle{bottles.length === 1 ? "" : "s"}
+      </p>
+      <div className="search-pill" style={{ marginBottom: 12 }}>
+        <SearchIcon />
+        <input
+          placeholder="Search producer, wine, region…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
       <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
         {[["all", "All"], ["natural", "Natural"], ["in-cellar", "In cellar"], ["drunk", "Drunk"]].map(([id, label]) => (
           <button
@@ -721,7 +766,7 @@ function CellarTab({ bottles, onUpdate, onDelete }) {
 function BottleThumbnail({ src }) {
   const [broken, setBroken] = useState(false);
   const boxStyle = {
-    width: 52, height: 72, borderRadius: 8, flexShrink: 0, overflow: "hidden",
+    width: 52, height: 72, borderRadius: 12, flexShrink: 0, overflow: "hidden",
     background: COLORS.paperDim, border: `1px solid ${COLORS.line}`,
     display: "flex", alignItems: "center", justifyContent: "center",
   };
@@ -743,7 +788,7 @@ function BottleCard({ bottle, onUpdate, onDelete }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="card-surface" style={{
-      background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 14,
+      background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 20,
       padding: 16, boxShadow: "0 2px 8px rgba(34,16,22,0.05)",
     }}>
       <div style={{ display: "flex", gap: 12 }}>
@@ -802,7 +847,7 @@ function RatingsTab({ bottles, onUpdate }) {
   const drunk = bottles.filter((b) => b.status === "drunk");
   return (
     <div>
-      <SectionTitle>Ratings · {drunk.length} drunk</SectionTitle>
+      <HeroTitle subtitle={`${drunk.length} bottle${drunk.length === 1 ? "" : "s"} rated`}>Ratings</HeroTitle>
       {drunk.length === 0 && (
         <div className="empty-state">
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
@@ -813,7 +858,7 @@ function RatingsTab({ bottles, onUpdate }) {
       )}
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {drunk.map((b) => (
-          <div key={b.id} className="card-surface" style={{ background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: 16, boxShadow: "0 2px 8px rgba(34,16,22,0.05)" }}>
+          <div key={b.id} className="card-surface" style={{ background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 20, padding: 16, boxShadow: "0 2px 8px rgba(34,16,22,0.05)" }}>
             <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 600, fontSize: 17 }}>
               {b.wineName || "Unnamed wine"}
             </div>
@@ -852,7 +897,7 @@ function SuggestionsTab({ bottles, suggestions, setSuggestions, status, setStatu
 
   return (
     <div>
-      <SectionTitle>For you</SectionTitle>
+      <HeroTitle subtitle="Picks based on what you've rated highly.">For you</HeroTitle>
       {rated.length === 0 && (
         <p style={{ color: COLORS.inkSoft, fontSize: 14, marginBottom: 12 }}>
           Rate a few bottles 4 or 5 to get suggestions tuned to your taste — or get general natural wine picks now.
@@ -864,7 +909,7 @@ function SuggestionsTab({ bottles, suggestions, setSuggestions, status, setStatu
       {status === "error" && <p style={{ color: COLORS.wineDark, fontSize: 14, marginTop: 10 }}>Couldn't fetch suggestions — try again.</p>}
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 16 }}>
         {suggestions.map((s, i) => (
-          <div key={i} className="card-surface" style={{ background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: 16, boxShadow: "0 2px 8px rgba(34,16,22,0.05)" }}>
+          <div key={i} className="card-surface" style={{ background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 20, padding: 16, boxShadow: "0 2px 8px rgba(34,16,22,0.05)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 600, fontSize: 17 }}>
                 {s.wineName}
@@ -890,9 +935,36 @@ function SectionTitle({ children, small }) {
   );
 }
 
+function HeroTitle({ children, subtitle }) {
+  return (
+    <div style={{ margin: "4px 0 24px" }}>
+      <h1 style={{
+        fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, fontSize: 34,
+        letterSpacing: -0.5, lineHeight: 1.05, margin: 0, color: COLORS.ink,
+      }}>
+        {children}
+      </h1>
+      {subtitle && (
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: COLORS.inkSoft, margin: "8px 0 0" }}>
+          {subtitle}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function SearchIcon() {
+  return (
+    <svg width="17" height="17" viewBox="0 0 20 20" fill="none">
+      <circle cx="9" cy="9" r="6.5" stroke={COLORS.inkSoft} strokeWidth="1.6" />
+      <line x1="14" y1="14" x2="18.5" y2="18.5" stroke={COLORS.inkSoft} strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 const labelStyle = { display: "block", fontSize: 12, color: COLORS.inkSoft, marginBottom: 4, fontFamily: "'JetBrains Mono', monospace" };
 const inputStyle = {
-  width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: 8,
+  width: "100%", boxSizing: "border-box", padding: "11px 14px", borderRadius: 12,
   border: `1px solid ${COLORS.line}`, fontSize: 14, fontFamily: "'Inter', sans-serif",
   background: "#fff", color: COLORS.ink,
 };
