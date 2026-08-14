@@ -60,7 +60,8 @@ wineAiRouter.post("/bottle-image", async (req, res) => {
 Check multiple sources before giving up: the producer's own website, wine retailers (Wine-Searcher, Total Wine, K&L Wines, Astor Wines, etc.), and wine databases/apps (Vivino, CellarTracker). Producers often reuse the same bottle photo across vintages, so it's fine if the exact vintage shown differs as long as the producer and wine name match.
 Find a URL that will work as an <img> src — a direct image link (ending in jpg/png/webp, or a CDN/product-image URL even without a file extension). A link to a product page that merely contains a photo does not count.
 Leave it blank only if you genuinely can't find any usable photo after checking multiple sources — don't give up after just one search.
-Respond with ONLY a JSON object, no markdown fences: {"photoUrl":""} (empty string if truly not found).`;
+Do not write any explanatory text, analysis, or commentary outside the JSON — go straight from searching to the answer.
+Respond with ONLY a JSON object, no markdown fences, no prose before or after it: {"photoUrl":""} (empty string if truly not found).`;
     const blocks = await callClaude({ textPrompt: prompt, useWebSearch: true });
     const text = getResponseText(blocks);
     const parsed = extractJSON(text);
