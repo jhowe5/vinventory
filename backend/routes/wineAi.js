@@ -50,36 +50,6 @@ Respond with ONLY a JSON object, no markdown fences: {"instagramHandle":""} (han
   }
 });
 
-// POST /api/bottle-image — { producer, wineName, vintage } -> { photoUrl }
-wineAiRouter.post("/bottle-image", async (req, res) => {
-  const { producer, wineName, vintage } = req.body;
-  if (!producer && !wineName) return res.status(400).json({ error: "No producer or wine name provided." });
-  try {
-    const label = [wineName, producer && `by ${producer}`, vintage].filter(Boolean).join(" ");
-    const prompt = `Search the web for a product photo of this wine bottle: ${label}.
-Check multiple sources before giving up: the producer's own website, wine retailers (Wine-Searcher, Total Wine, K&L Wines, Astor Wines, etc.), and wine databases/apps (Vivino, CellarTracker). Producers often reuse the same bottle photo across vintages, so it's fine if the exact vintage shown differs as long as the producer and wine name match.
-Find a URL that will work as an <img> src — a direct image link (ending in jpg/png/webp, or a CDN/product-image URL even without a file extension). A link to a product page that merely contains a photo does not count.
-Leave it blank only if you genuinely can't find any usable photo after checking multiple sources — don't give up after just one search.
-Do not write any explanatory text, analysis, or commentary outside the JSON — go straight from searching to the answer.
-Respond with ONLY a JSON object, no markdown fences, no prose before or after it: {"photoUrl":""} (empty string if truly not found).`;
-    const blocks = await callClaude({ textPrompt: prompt, useWebSearch: true });
-    const text = getResponseText(blocks);
-    const parsed = extractJSON(text);
-    if (!parsed) console.error("Could not parse /bottle-image response. Raw text was:\n", text);
-    const url = parsed && typeof parsed.photoUrl === "string" ? parsed.photoUrl.trim() : "";
-    const validUrl = /^https?:\/\//i.test(url) ? url : "";
-    if (!validUrl) {
-      console.log(
-        `bottle-image: no photo for "${label}". Block types: ${blocks.map((b) => b.type).join(", ")}. Raw text:\n${text}`
-      );
-    }
-    res.json({ photoUrl: validUrl });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Bottle image lookup failed." });
-  }
-});
-
 // POST /api/suggestions — { likedWines: [{wineName, producer, varietal, region, rating}] } -> suggestions[]
 wineAiRouter.post("/suggestions", async (req, res) => {
   const likedWines = req.body.likedWines || [];

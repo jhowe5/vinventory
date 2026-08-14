@@ -298,18 +298,7 @@ function CellarApp({ email, onLogout }) {
   async function addBottle(bottle) {
     const saved = await api.addBottle(bottle);
     setBottles((prev) => [saved, ...prev]);
-    if (!saved.photo) findPhotoInBackground(saved.id, saved.producer, saved.wineName, saved.vintage);
     return saved;
-  }
-
-  // Best-effort: looks up a stock product photo and patches it in once found.
-  // Never blocks the save, never surfaces an error if it comes up empty.
-  function findPhotoInBackground(id, producer, wineName, vintage) {
-    api.lookupBottleImage(producer, wineName, vintage)
-      .then(({ photoUrl }) => {
-        if (photoUrl) updateBottle(id, { photo: photoUrl });
-      })
-      .catch(() => {});
   }
 
   async function updateBottle(id, changes) {
@@ -752,20 +741,6 @@ function BottleThumbnail({ src }) {
 
 function BottleCard({ bottle, onUpdate, onDelete }) {
   const [open, setOpen] = useState(false);
-  const [findingPhoto, setFindingPhoto] = useState(false);
-
-  async function findPhoto() {
-    setFindingPhoto(true);
-    try {
-      const { photoUrl } = await api.lookupBottleImage(bottle.producer, bottle.wineName, bottle.vintage);
-      if (photoUrl) onUpdate(bottle.id, { photo: photoUrl });
-    } catch {
-      // best-effort — leave the placeholder in place
-    } finally {
-      setFindingPhoto(false);
-    }
-  }
-
   return (
     <div className="card-surface" style={{
       background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 14,
@@ -808,11 +783,6 @@ function BottleCard({ bottle, onUpdate, onDelete }) {
             </p>
           )}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
-            {!bottle.photo && (
-              <button onClick={findPhoto} disabled={findingPhoto} className="btn-ghost small">
-                {findingPhoto ? "Looking…" : "Find a photo"}
-              </button>
-            )}
             {bottle.status !== "drunk" && (
               <button onClick={() => onUpdate(bottle.id, { status: "drunk" })} className="btn-ghost small">
                 Mark as drunk
