@@ -21,7 +21,7 @@ export async function callClaude({ imageBase64, imageMediaType, textPrompt, useW
     // Generous budget: with web search running, the model can burn a good
     // chunk of tokens on search calls before it ever writes the final
     // answer. Too small a budget here silently truncates that answer.
-    max_tokens: 4096,
+    max_tokens: 8192,
     messages: [{ role: "user", content: userContent }],
   };
   if (useWebSearch) {
@@ -44,6 +44,9 @@ export async function callClaude({ imageBase64, imageMediaType, textPrompt, useW
   }
 
   const data = await response.json();
+  if (data.stop_reason && data.stop_reason !== "end_turn") {
+    console.warn(`Claude response stopped early (${data.stop_reason}) — answer may be truncated.`);
+  }
   return data.content || [];
 }
 
