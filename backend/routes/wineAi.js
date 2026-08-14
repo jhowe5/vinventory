@@ -56,10 +56,11 @@ wineAiRouter.post("/bottle-image", async (req, res) => {
   if (!producer && !wineName) return res.status(400).json({ error: "No producer or wine name provided." });
   try {
     const label = [wineName, producer && `by ${producer}`, vintage].filter(Boolean).join(" ");
-    const prompt = `Search the web for a product photo of this specific wine bottle: ${label}.
-Find a direct URL to an image of the bottle from a wine retailer, wine database, or the producer's own site — it must point straight at an image file (jpg, png, or webp), not a webpage.
-Only answer if you're reasonably confident it's the correct wine and the link is publicly viewable — leave it blank rather than guess.
-Respond with ONLY a JSON object, no markdown fences: {"photoUrl":""} (empty string if not found or not confident).`;
+    const prompt = `Search the web for a product photo of this wine bottle: ${label}.
+Check multiple sources before giving up: the producer's own website, wine retailers (Wine-Searcher, Total Wine, K&L Wines, Astor Wines, etc.), and wine databases/apps (Vivino, CellarTracker). Producers often reuse the same bottle photo across vintages, so it's fine if the exact vintage shown differs as long as the producer and wine name match.
+Find a URL that will work as an <img> src — a direct image link (ending in jpg/png/webp, or a CDN/product-image URL even without a file extension). A link to a product page that merely contains a photo does not count.
+Leave it blank only if you genuinely can't find any usable photo after checking multiple sources — don't give up after just one search.
+Respond with ONLY a JSON object, no markdown fences: {"photoUrl":""} (empty string if truly not found).`;
     const blocks = await callClaude({ textPrompt: prompt, useWebSearch: true });
     const text = getResponseText(blocks);
     const parsed = extractJSON(text);
