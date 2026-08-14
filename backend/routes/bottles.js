@@ -18,6 +18,7 @@ function rowToBottle(row) {
     tastingNotes: row.tasting_notes,
     priceRange: row.price_range,
     instagramHandle: row.instagram_handle,
+    photo: row.photo,
     quantity: row.quantity,
     status: row.status,
     rating: row.rating,
@@ -46,14 +47,14 @@ bottlesRouter.post("/", async (req, res) => {
   try {
     const result = await pool.query(
       `INSERT INTO bottles
-        (user_id, producer, wine_name, vintage, varietal, region, is_natural, tasting_notes, price_range, instagram_handle, quantity, status)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+        (user_id, producer, wine_name, vintage, varietal, region, is_natural, tasting_notes, price_range, instagram_handle, photo, quantity, status)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
        RETURNING *`,
       [
         req.userId,
         b.producer || "", b.wineName || "", b.vintage || "", b.varietal || "", b.region || "",
         !!b.natural, b.tastingNotes || "", b.priceRange || "", b.instagramHandle || "",
-        b.quantity || 1, b.status || "in-cellar",
+        b.photo || null, b.quantity || 1, b.status || "in-cellar",
       ]
     );
     res.status(201).json(rowToBottle(result.rows[0]));
@@ -68,7 +69,7 @@ bottlesRouter.patch("/:id", async (req, res) => {
   const fieldMap = {
     producer: "producer", wineName: "wine_name", vintage: "vintage", varietal: "varietal",
     region: "region", natural: "is_natural", tastingNotes: "tasting_notes", priceRange: "price_range",
-    instagramHandle: "instagram_handle", quantity: "quantity", status: "status",
+    instagramHandle: "instagram_handle", photo: "photo", quantity: "quantity", status: "status",
     rating: "rating", ratingNotes: "rating_notes",
   };
   const updates = [];

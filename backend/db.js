@@ -46,6 +46,9 @@ export async function initDb() {
     );
 
     CREATE INDEX IF NOT EXISTS idx_bottles_user_id ON bottles(user_id);
+
+    -- Added after the initial release, so existing installs need the column added explicitly.
+    ALTER TABLE bottles ADD COLUMN IF NOT EXISTS photo TEXT;
   `);
   console.log("Database ready.");
 }
