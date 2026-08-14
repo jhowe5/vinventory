@@ -298,6 +298,18 @@ function CellarApp({ email, onLogout }) {
   async function addBottle(bottle) {
     const saved = await api.addBottle(bottle);
     setBottles((prev) => [saved, ...prev]);
+    if (!saved.photo) findPhotoInBackground(saved.id, saved.producer, saved.wineName, saved.vintage);
+    return saved;
+  }
+
+  // Best-effort: looks up a stock product photo and patches it in once found.
+  // Never blocks the save, never surfaces an error if it comes up empty.
+  function findPhotoInBackground(id, producer, wineName, vintage) {
+    api.lookupBottleImage(producer, wineName, vintage)
+      .then(({ photoUrl }) => {
+        if (photoUrl) updateBottle(id, { photo: photoUrl });
+      })
+      .catch(() => {});
   }
 
   async function updateBottle(id, changes) {
@@ -718,12 +730,13 @@ function CellarTab({ bottles, onUpdate, onDelete }) {
 }
 
 function BottleThumbnail({ src }) {
+  const [broken, setBroken] = useState(false);
   const boxStyle = {
     width: 52, height: 72, borderRadius: 8, flexShrink: 0, overflow: "hidden",
     background: COLORS.paperDim, border: `1px solid ${COLORS.line}`,
     display: "flex", alignItems: "center", justifyContent: "center",
   };
-  if (!src) {
+  if (!src || broken) {
     return (
       <div style={boxStyle}>
         <BottleIcon size={20} />
@@ -732,13 +745,27 @@ function BottleThumbnail({ src }) {
   }
   return (
     <div style={boxStyle}>
-      <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      <img src={src} alt="" onError={() => setBroken(true)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
     </div>
   );
 }
 
 function BottleCard({ bottle, onUpdate, onDelete }) {
   const [open, setOpen] = useState(false);
+  const [findingPhoto, setFindingPhoto] = useState(false);
+
+  async function findPhoto() {
+    setFindingPhoto(true);
+    try {
+      const { photoUrl } = await api.lookupBottleImage(bottle.producer, bottle.wineName, bottle.vintage);
+      if (photoUrl) onUpdate(bottle.id, { photo: photoUrl });
+    } catch {
+      // best-effort — leave the placeholder in place
+    } finally {
+      setFindingPhoto(false);
+    }
+  }
+
   return (
     <div className="card-surface" style={{
       background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 14,
@@ -781,6 +808,11 @@ function BottleCard({ bottle, onUpdate, onDelete }) {
             </p>
           )}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
+            {!bottle.photo && (
+              <button onClick={findPhoto} disabled={findingPhoto} className="btn-ghost small">
+                {findingPhoto ? "Looking…" : "Find a photo"}
+              </button>
+            )}
             {bottle.status !== "drunk" && (
               <button onClick={() => onUpdate(bottle.id, { status: "drunk" })} className="btn-ghost small">
                 Mark as drunk

@@ -50,6 +50,28 @@ Respond with ONLY a JSON object, no markdown fences: {"instagramHandle":""} (han
   }
 });
 
+// POST /api/bottle-image — { producer, wineName, vintage } -> { photoUrl }
+wineAiRouter.post("/bottle-image", async (req, res) => {
+  const { producer, wineName, vintage } = req.body;
+  if (!producer && !wineName) return res.status(400).json({ error: "No producer or wine name provided." });
+  try {
+    const label = [wineName, producer && `by ${producer}`, vintage].filter(Boolean).join(" ");
+    const prompt = `Search the web for a product photo of this specific wine bottle: ${label}.
+Find a direct URL to an image of the bottle from a wine retailer, wine database, or the producer's own site — it must point straight at an image file (jpg, png, or webp), not a webpage.
+Only answer if you're reasonably confident it's the correct wine and the link is publicly viewable — leave it blank rather than guess.
+Respond with ONLY a JSON object, no markdown fences: {"photoUrl":""} (empty string if not found or not confident).`;
+    const blocks = await callClaude({ textPrompt: prompt, useWebSearch: true });
+    const text = getResponseText(blocks);
+    const parsed = extractJSON(text);
+    if (!parsed) console.error("Could not parse /bottle-image response. Raw text was:\n", text);
+    const url = parsed && typeof parsed.photoUrl === "string" ? parsed.photoUrl.trim() : "";
+    res.json({ photoUrl: /^https?:\/\//i.test(url) ? url : "" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Bottle image lookup failed." });
+  }
+});
+
 // POST /api/suggestions — { likedWines: [{wineName, producer, varietal, region, rating}] } -> suggestions[]
 wineAiRouter.post("/suggestions", async (req, res) => {
   const likedWines = req.body.likedWines || [];

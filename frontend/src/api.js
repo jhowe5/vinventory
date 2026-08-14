@@ -41,6 +41,8 @@ export const api = {
     request("/api/identify", { method: "POST", body: JSON.stringify({ imageBase64, imageMediaType }) }),
   lookupInstagram: (producer, region) =>
     request("/api/instagram", { method: "POST", body: JSON.stringify({ producer, region }) }),
+  lookupBottleImage: (producer, wineName, vintage) =>
+    request("/api/bottle-image", { method: "POST", body: JSON.stringify({ producer, wineName, vintage }) }),
   getSuggestions: (likedWines) =>
     request("/api/suggestions", { method: "POST", body: JSON.stringify({ likedWines }) }),
 };
