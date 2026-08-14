@@ -460,6 +460,7 @@ function ScanTab({ onAdd }) {
         tastingNotes: parsed.tastingNotes || "",
         priceRange: parsed.priceRange || "",
         instagramHandle: "",
+        photo: `data:${imageMediaType};base64,${imageBase64}`,
         quantity: 1,
         status: "in-cellar",
       };
@@ -535,8 +536,9 @@ function ScanTab({ onAdd }) {
         <div className="card-surface" style={{
           position: "relative", borderRadius: 14, overflow: "hidden",
           border: `1px solid ${COLORS.line}`, boxShadow: "0 4px 16px rgba(34,16,22,0.08)", marginBottom: 16,
+          background: COLORS.paperDim, display: "flex", justifyContent: "center",
         }}>
-          <img src={imagePreview} alt="Bottle preview" style={{ width: "100%", maxHeight: 320, objectFit: "cover", display: "block" }} />
+          <img src={imagePreview} alt="Bottle preview" style={{ maxWidth: "100%", maxHeight: 420, objectFit: "contain", display: "block" }} />
           <button
             onClick={resetPhoto}
             className="btn-ghost"
@@ -715,6 +717,26 @@ function CellarTab({ bottles, onUpdate, onDelete }) {
   );
 }
 
+function BottleThumbnail({ src }) {
+  const boxStyle = {
+    width: 52, height: 72, borderRadius: 8, flexShrink: 0, overflow: "hidden",
+    background: COLORS.paperDim, border: `1px solid ${COLORS.line}`,
+    display: "flex", alignItems: "center", justifyContent: "center",
+  };
+  if (!src) {
+    return (
+      <div style={boxStyle}>
+        <BottleIcon size={20} />
+      </div>
+    );
+  }
+  return (
+    <div style={boxStyle}>
+      <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+    </div>
+  );
+}
+
 function BottleCard({ bottle, onUpdate, onDelete }) {
   const [open, setOpen] = useState(false);
   return (
@@ -722,26 +744,31 @@ function BottleCard({ bottle, onUpdate, onDelete }) {
       background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 14,
       padding: 16, boxShadow: "0 2px 8px rgba(34,16,22,0.05)",
     }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div>
-          <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 600, fontSize: 18 }}>
-            {bottle.wineName || "Unnamed wine"}
+      <div style={{ display: "flex", gap: 12 }}>
+        <BottleThumbnail src={bottle.photo} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+            <div>
+              <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 600, fontSize: 18 }}>
+                {bottle.wineName || "Unnamed wine"}
+              </div>
+              <div style={{ fontSize: 13, color: COLORS.inkSoft }}>
+                {bottle.producer} {bottle.vintage ? `· ${bottle.vintage}` : ""}
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              {bottle.natural && <TagBadge tone="gold">Natural</TagBadge>}
+              <TagBadge tone="wine">{bottle.status === "drunk" ? "Drunk" : "In cellar"}</TagBadge>
+            </div>
           </div>
-          <div style={{ fontSize: 13, color: COLORS.inkSoft }}>
-            {bottle.producer} {bottle.vintage ? `· ${bottle.vintage}` : ""}
+          <div style={{ fontSize: 13, color: COLORS.inkSoft, marginTop: 6 }}>
+            {[bottle.varietal, bottle.region].filter(Boolean).join(" · ")}
           </div>
-        </div>
-        <div style={{ display: "flex", gap: 6 }}>
-          {bottle.natural && <TagBadge tone="gold">Natural</TagBadge>}
-          <TagBadge tone="wine">{bottle.status === "drunk" ? "Drunk" : "In cellar"}</TagBadge>
+          <button onClick={() => setOpen(!open)} className="link-underline" style={{ marginTop: 10, fontSize: 13 }}>
+            {open ? "Hide details ↑" : "Details ↓"}
+          </button>
         </div>
       </div>
-      <div style={{ fontSize: 13, color: COLORS.inkSoft, marginTop: 6 }}>
-        {[bottle.varietal, bottle.region].filter(Boolean).join(" · ")}
-      </div>
-      <button onClick={() => setOpen(!open)} className="link-underline" style={{ marginTop: 10, fontSize: 13 }}>
-        {open ? "Hide details ↑" : "Details ↓"}
-      </button>
       {open && (
         <div style={{ marginTop: 10, fontSize: 14, borderTop: `1px solid ${COLORS.line}`, paddingTop: 10 }}>
           {bottle.tastingNotes && <p style={{ margin: "0 0 8px" }}>{bottle.tastingNotes}</p>}
