@@ -10,17 +10,127 @@ import { api } from "./api.js";
 const COLORS = {
   paper: "#EFE9DA",
   paperDim: "#E4DCC8",
+  cream: "#FBF8F1",
   ink: "#221016",
   inkSoft: "#5B4B4F",
   wine: "#7A1F3D",
   wineDark: "#4E1327",
+  wineLight: "#9A3358",
   lime: "#CFE01F",
-  gold: "#C9A227",
-  line: "#D8CEB6",
+  gold: "#B5862F",
+  clay: "#B9A184",
+  line: "#DCD2BA",
 };
 
 const FONT_IMPORT = `
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+`;
+
+const GLOBAL_CSS = `
+* { box-sizing: border-box; }
+
+.btn-primary {
+  background: linear-gradient(180deg, #8A2547, ${COLORS.wineDark});
+  color: ${COLORS.cream};
+  border: none;
+  border-radius: 10px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(34,16,22,0.18), 0 6px 16px rgba(122,31,61,0.28);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(34,16,22,0.2), 0 10px 20px rgba(122,31,61,0.32);
+  filter: brightness(1.05);
+}
+.btn-primary:active:not(:disabled) { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.55; cursor: default; box-shadow: none; }
+
+.btn-ghost {
+  background: transparent;
+  border: 1.5px solid ${COLORS.wine};
+  color: ${COLORS.wine};
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.btn-ghost:hover { background: ${COLORS.wine}; color: ${COLORS.cream}; }
+
+.field {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.field:focus {
+  outline: none;
+  border-color: ${COLORS.wine} !important;
+  box-shadow: 0 0 0 3px rgba(122,31,61,0.14);
+  background: #fff !important;
+}
+
+.card-surface {
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.card-surface:hover {
+  box-shadow: 0 6px 20px rgba(34,16,22,0.08);
+}
+
+.dropzone {
+  position: relative;
+  border: 1.5px dashed ${COLORS.clay};
+  border-radius: 18px;
+  background: ${COLORS.cream};
+  padding: 40px 24px;
+  text-align: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+.dropzone:hover, .dropzone.dragover {
+  border-color: ${COLORS.wine};
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(122,31,61,0.1);
+}
+.dropzone.dragover { border-style: solid; }
+
+.link-underline {
+  background: none; border: none; color: ${COLORS.wine};
+  font-size: 14px; text-decoration: underline; cursor: pointer; padding: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-ghost.danger { border-color: ${COLORS.wineDark}; color: ${COLORS.wineDark}; }
+.btn-ghost.danger:hover { background: ${COLORS.wineDark}; color: ${COLORS.cream}; }
+.btn-ghost.small { padding: 6px 12px; font-size: 12px; border-radius: 7px; }
+
+.chip {
+  padding: 6px 14px; border-radius: 999px; border: 1.5px solid ${COLORS.wine};
+  background: transparent; color: ${COLORS.wine};
+  font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif;
+  transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.chip:hover { box-shadow: 0 2px 8px rgba(122,31,61,0.15); }
+.chip.active { background: ${COLORS.wine}; color: ${COLORS.cream}; }
+
+.empty-state {
+  border: 1.5px dashed ${COLORS.clay};
+  border-radius: 16px;
+  padding: 30px 20px;
+  text-align: center;
+  color: ${COLORS.inkSoft};
+  font-size: 14px;
+  background: rgba(255,255,255,0.35);
+}
+
+input[type="checkbox"] { accent-color: ${COLORS.wine}; width: 16px; height: 16px; cursor: pointer; }
+
+::placeholder { color: ${COLORS.clay}; }
 `;
 
 function fileToBase64(file) {
@@ -67,9 +177,9 @@ function TagBadge({ children, tone = "wine" }) {
   const bg = tone === "wine" ? COLORS.wine : COLORS.gold;
   return (
     <span style={{
-      display: "inline-block", background: bg, color: COLORS.paper,
+      display: "inline-block", background: bg, color: COLORS.cream,
       fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: 0.5,
-      padding: "2px 8px", borderRadius: 999, textTransform: "uppercase",
+      padding: "3px 9px", borderRadius: 999, textTransform: "uppercase", whiteSpace: "nowrap",
     }}>
       {children}
     </span>
@@ -122,33 +232,37 @@ function AuthScreen({ onLoggedIn }) {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: COLORS.paper, color: COLORS.ink, fontFamily: "'Inter', system-ui, sans-serif", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-      <style>{FONT_IMPORT}</style>
+    <div style={{ minHeight: "100vh", background: `radial-gradient(circle at 20% 0%, ${COLORS.paperDim}, ${COLORS.paper} 60%)`, color: COLORS.ink, fontFamily: "'Inter', system-ui, sans-serif", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <style>{FONT_IMPORT + GLOBAL_CSS}</style>
       <div style={{ width: "100%", maxWidth: 360 }}>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 6 }}>
+          <BottleIcon filled size={30} />
+        </div>
         <h1 style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, fontSize: 32, color: COLORS.wine, margin: "0 0 4px", textAlign: "center" }}>
           Cellar
         </h1>
         <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: COLORS.inkSoft, textAlign: "center", margin: "0 0 28px" }}>
-          natural wine, inclusive of all
+          every bottle, every note
         </p>
-        <form onSubmit={handleSubmit} style={{ background: COLORS.paperDim, border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: 20 }}>
+        <form onSubmit={handleSubmit} className="card-surface" style={{ background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: 22, boxShadow: "0 4px 16px rgba(34,16,22,0.06)" }}>
           <div style={{ marginBottom: 12 }}>
             <label style={labelStyle}>Email</label>
-            <input type="email" required value={emailInput} onChange={(e) => setEmailInput(e.target.value)} style={inputStyle} />
+            <input className="field" type="email" required value={emailInput} onChange={(e) => setEmailInput(e.target.value)} style={inputStyle} />
           </div>
           <div style={{ marginBottom: 12 }}>
             <label style={labelStyle}>Password</label>
-            <input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} style={inputStyle} />
+            <input className="field" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} style={inputStyle} />
             {mode === "signup" && <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 4 }}>At least 8 characters.</div>}
           </div>
           {error && <p style={{ color: COLORS.wineDark, fontSize: 13, margin: "0 0 12px" }}>{error}</p>}
-          <button type="submit" disabled={busy} style={{ ...primaryButtonStyle, width: "100%" }}>
+          <button type="submit" disabled={busy} className="btn-primary" style={{ width: "100%" }}>
             {busy ? "One moment…" : mode === "login" ? "Log in" : "Create account"}
           </button>
         </form>
         <button
           onClick={() => { setMode(mode === "login" ? "signup" : "login"); setError(null); }}
-          style={{ background: "none", border: "none", color: COLORS.wine, fontSize: 13, marginTop: 14, cursor: "pointer", width: "100%", textAlign: "center", textDecoration: "underline" }}
+          className="link-underline"
+          style={{ marginTop: 14, width: "100%", textAlign: "center" }}
         >
           {mode === "login" ? "New here? Create an account" : "Already have an account? Log in"}
         </button>
@@ -162,6 +276,8 @@ function CellarApp({ email, onLogout }) {
   const [loaded, setLoaded] = useState(false);
   const [activeTab, setActiveTab] = useState("scan");
   const [loadError, setLoadError] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
+  const [suggestionsStatus, setSuggestionsStatus] = useState("idle");
 
   async function refreshBottles() {
     try {
@@ -204,17 +320,17 @@ function CellarApp({ email, onLogout }) {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: COLORS.paper, color: COLORS.ink, fontFamily: "'Inter', system-ui, sans-serif" }}>
-      <style>{FONT_IMPORT}</style>
+    <div style={{ minHeight: "100vh", background: `radial-gradient(circle at 15% 0%, ${COLORS.paperDim}, ${COLORS.paper} 55%)`, color: COLORS.ink, fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <style>{FONT_IMPORT + GLOBAL_CSS}</style>
       <Header activeTab={activeTab} setActiveTab={setActiveTab} email={email} onLogout={onLogout} />
       <main style={{ maxWidth: 720, margin: "0 auto", padding: "24px 16px 64px" }}>
         {loadError && (
-          <div style={{ background: "#fff3f3", border: `1px solid ${COLORS.wine}`, color: COLORS.wineDark, padding: 10, borderRadius: 8, marginBottom: 16, fontSize: 14 }}>
+          <div style={{ background: "#FDF2F0", border: `1px solid ${COLORS.wine}`, color: COLORS.wineDark, padding: "10px 14px", borderRadius: 10, marginBottom: 16, fontSize: 14 }}>
             Couldn't reach the server: {loadError}
           </div>
         )}
         {!loaded ? (
-          <p style={{ color: COLORS.inkSoft }}>Loading your cellar…</p>
+          <p style={{ color: COLORS.inkSoft, fontSize: 14, textAlign: "center", padding: "40px 0" }}>Loading your cellar…</p>
         ) : (
           <>
             {activeTab === "scan" && <ScanTab onAdd={addBottle} />}
@@ -222,7 +338,15 @@ function CellarApp({ email, onLogout }) {
               <CellarTab bottles={bottles} onUpdate={updateBottle} onDelete={deleteBottle} />
             )}
             {activeTab === "ratings" && <RatingsTab bottles={bottles} onUpdate={updateBottle} />}
-            {activeTab === "suggestions" && <SuggestionsTab bottles={bottles} />}
+            {activeTab === "suggestions" && (
+              <SuggestionsTab
+                bottles={bottles}
+                suggestions={suggestions}
+                setSuggestions={setSuggestions}
+                status={suggestionsStatus}
+                setStatus={setSuggestionsStatus}
+              />
+            )}
           </>
         )}
       </main>
@@ -238,25 +362,28 @@ function Header({ activeTab, setActiveTab, email, onLogout }) {
     { id: "suggestions", label: "For You" },
   ];
   return (
-    <header style={{ borderBottom: `1px solid ${COLORS.line}`, background: COLORS.paper, position: "sticky", top: 0, zIndex: 10 }}>
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "20px 16px 0" }}>
+    <header style={{ background: COLORS.paper, boxShadow: `0 1px 0 ${COLORS.line}, 0 4px 12px rgba(34,16,22,0.04)`, position: "sticky", top: 0, zIndex: 10 }}>
+      <div style={{ maxWidth: 720, margin: "0 auto", padding: "18px 16px 0" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <div>
-            <h1 style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, fontSize: 30, letterSpacing: -0.5, margin: 0, color: COLORS.wine }}>
-              Cellar
-            </h1>
-            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: COLORS.inkSoft, margin: "2px 0 16px" }}>
-              natural wine, inclusive of all
-            </p>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <BottleIcon filled size={24} />
+            <div>
+              <h1 style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700, fontSize: 28, letterSpacing: -0.5, margin: 0, color: COLORS.wine, lineHeight: 1 }}>
+                Cellar
+              </h1>
+              <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: COLORS.inkSoft, margin: "3px 0 0" }}>
+                every bottle, every note
+              </p>
+            </div>
           </div>
           <div style={{ textAlign: "right" }}>
             <div style={{ fontSize: 12, color: COLORS.inkSoft, marginBottom: 4 }}>{email}</div>
-            <button onClick={onLogout} style={{ background: "none", border: "none", color: COLORS.wine, fontSize: 12, textDecoration: "underline", cursor: "pointer" }}>
+            <button onClick={onLogout} className="link-underline" style={{ fontSize: 12 }}>
               Log out
             </button>
           </div>
         </div>
-        <nav style={{ display: "flex", gap: 4 }}>
+        <nav style={{ display: "flex", gap: 4, marginTop: 18 }}>
           {tabs.map((t) => (
             <button
               key={t.id}
@@ -267,6 +394,7 @@ function Header({ activeTab, setActiveTab, email, onLogout }) {
                 color: activeTab === t.id ? COLORS.wine : COLORS.inkSoft,
                 borderBottom: activeTab === t.id ? `2px solid ${COLORS.wine}` : "2px solid transparent",
                 cursor: "pointer",
+                transition: "color 0.15s ease, border-color 0.15s ease",
               }}
             >
               {t.label}
@@ -286,10 +414,10 @@ function ScanTab({ onAdd }) {
   const [instaStatus, setInstaStatus] = useState("idle"); // idle | looking
   const [draft, setDraft] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef(null);
 
-  async function handleFile(e) {
-    const file = e.target.files[0];
+  async function handleFile(file) {
     if (!file) return;
     setImagePreview(URL.createObjectURL(file));
     setImageMediaType(file.type);
@@ -301,6 +429,21 @@ function ScanTab({ onAdd }) {
     } catch {
       setStatus("error");
     }
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  }
+
+  function resetPhoto() {
+    setImagePreview(null);
+    setImageBase64(null);
+    setStatus("idle");
+    setDraft(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   async function identifyWine() {
@@ -364,14 +507,48 @@ function ScanTab({ onAdd }) {
         type="file"
         accept="image/*"
         capture="environment"
-        onChange={handleFile}
-        style={{ display: "block", marginBottom: 16, fontSize: 14 }}
+        onChange={(e) => handleFile(e.target.files[0])}
+        style={{ display: "none" }}
       />
-      {imagePreview && (
-        <img src={imagePreview} alt="Bottle preview" style={{ width: "100%", maxWidth: 280, borderRadius: 8, marginBottom: 16, border: `1px solid ${COLORS.line}` }} />
+
+      {!imagePreview && (
+        <div
+          className={`dropzone${dragOver ? " dragover" : ""}`}
+          onClick={() => fileInputRef.current && fileInputRef.current.click()}
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={handleDrop}
+        >
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+            <CameraIcon />
+          </div>
+          <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 600, fontSize: 17, color: COLORS.ink }}>
+            Snap or drop a label photo
+          </div>
+          <div style={{ fontSize: 13, color: COLORS.inkSoft, marginTop: 4 }}>
+            We'll read the producer, vintage and region for you
+          </div>
+        </div>
       )}
+
+      {imagePreview && (
+        <div className="card-surface" style={{
+          position: "relative", borderRadius: 14, overflow: "hidden",
+          border: `1px solid ${COLORS.line}`, boxShadow: "0 4px 16px rgba(34,16,22,0.08)", marginBottom: 16,
+        }}>
+          <img src={imagePreview} alt="Bottle preview" style={{ width: "100%", maxHeight: 320, objectFit: "cover", display: "block" }} />
+          <button
+            onClick={resetPhoto}
+            className="btn-ghost"
+            style={{ position: "absolute", top: 10, right: 10, background: COLORS.cream, fontSize: 12, padding: "6px 12px" }}
+          >
+            Change photo
+          </button>
+        </div>
+      )}
+
       {imageBase64 && status !== "done" && status !== "save-error" && (
-        <button onClick={identifyWine} disabled={status === "reading"} style={primaryButtonStyle}>
+        <button onClick={identifyWine} disabled={status === "reading"} className="btn-primary">
           {status === "reading" ? "Reading label…" : "Identify this wine"}
         </button>
       )}
@@ -381,29 +558,34 @@ function ScanTab({ onAdd }) {
         </p>
       )}
       {(status === "done" || status === "save-error") && draft && (
-        <div style={{ marginTop: 20 }}>
+        <div className="card-surface" style={{ marginTop: 20, background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: 18 }}>
           <SectionTitle small>Review before saving</SectionTitle>
           <DraftForm draft={draft} setDraft={setDraft} instaLoading={instaStatus === "looking"} />
           {status === "save-error" && (
             <p style={{ color: COLORS.wineDark, fontSize: 13, marginTop: 8 }}>Save failed — check your connection and try again.</p>
           )}
-          <button onClick={saveDraft} disabled={saving} style={{ ...primaryButtonStyle, marginTop: 12 }}>
+          <button onClick={saveDraft} disabled={saving} className="btn-primary" style={{ marginTop: 12 }}>
             {saving ? "Saving…" : "Add to cellar"}
           </button>
         </div>
       )}
       {!imageBase64 && (
-        <div style={{ marginTop: 12 }}>
+        <div style={{ marginTop: 16, textAlign: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, color: COLORS.inkSoft, fontSize: 12, margin: "0 0 14px" }}>
+            <div style={{ flex: 1, height: 1, background: COLORS.line }} />
+            or
+            <div style={{ flex: 1, height: 1, background: COLORS.line }} />
+          </div>
           <button
             onClick={() => setDraft({ producer: "", wineName: "", vintage: "", varietal: "", region: "", natural: false, tastingNotes: "", priceRange: "", instagramHandle: "", quantity: 1, status: "in-cellar" })}
-            style={{ background: "none", border: "none", color: COLORS.wine, fontSize: 14, textDecoration: "underline", cursor: "pointer" }}
+            className="btn-ghost"
           >
-            Or enter a bottle manually
+            Enter a bottle manually
           </button>
           {draft && !imageBase64 && (
-            <div style={{ marginTop: 16 }}>
+            <div className="card-surface" style={{ marginTop: 16, background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: 18, textAlign: "left" }}>
               <DraftForm draft={draft} setDraft={setDraft} />
-              <button onClick={saveDraft} disabled={saving} style={{ ...primaryButtonStyle, marginTop: 12 }}>
+              <button onClick={saveDraft} disabled={saving} className="btn-primary" style={{ marginTop: 12 }}>
                 {saving ? "Saving…" : "Add to cellar"}
               </button>
             </div>
@@ -414,11 +596,22 @@ function ScanTab({ onAdd }) {
   );
 }
 
+function CameraIcon() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+      <path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"
+            stroke={COLORS.wine} strokeWidth="1.4" strokeLinejoin="round" />
+      <circle cx="12" cy="13" r="3.4" stroke={COLORS.wine} strokeWidth="1.4" />
+    </svg>
+  );
+}
+
 function DraftForm({ draft, setDraft, instaLoading }) {
   const field = (key, label, placeholder = "") => (
     <div style={{ marginBottom: 10 }}>
       <label style={labelStyle}>{label}</label>
       <input
+        className="field"
         value={draft[key]}
         placeholder={placeholder}
         onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
@@ -438,6 +631,7 @@ function DraftForm({ draft, setDraft, instaLoading }) {
       <div style={{ marginBottom: 10 }}>
         <label style={labelStyle}>Producer's Instagram (handle, no @)</label>
         <input
+          className="field"
           value={draft.instagramHandle || ""}
           placeholder={instaLoading ? "Looking it up…" : "e.g. domaine_example"}
           onChange={(e) => setDraft({ ...draft, instagramHandle: e.target.value.replace(/^@/, "") })}
@@ -448,6 +642,7 @@ function DraftForm({ draft, setDraft, instaLoading }) {
       <div style={{ marginBottom: 10 }}>
         <label style={labelStyle}>Tasting notes</label>
         <textarea
+          className="field"
           value={draft.tastingNotes}
           onChange={(e) => setDraft({ ...draft, tastingNotes: e.target.value })}
           rows={3}
@@ -486,29 +681,30 @@ function CellarTab({ bottles, onUpdate, onDelete }) {
     <div>
       <SectionTitle>Your cellar · {bottles.length} bottle{bottles.length === 1 ? "" : "s"}</SectionTitle>
       <input
+        className="field"
         placeholder="Search producer, wine, region…"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         style={{ ...inputStyle, marginBottom: 10 }}
       />
-      <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
         {[["all", "All"], ["natural", "Natural"], ["in-cellar", "In cellar"], ["drunk", "Drunk"]].map(([id, label]) => (
           <button
             key={id}
             onClick={() => setFilter(id)}
-            style={{
-              padding: "5px 12px", borderRadius: 999, border: `1px solid ${COLORS.wine}`,
-              background: filter === id ? COLORS.wine : "transparent",
-              color: filter === id ? COLORS.paper : COLORS.wine,
-              fontSize: 13, cursor: "pointer",
-            }}
+            className={`chip${filter === id ? " active" : ""}`}
           >
             {label}
           </button>
         ))}
       </div>
       {visible.length === 0 && (
-        <p style={{ color: COLORS.inkSoft, fontSize: 14 }}>No bottles match yet. Scan one to get started.</p>
+        <div className="empty-state">
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
+            <BottleIcon size={22} />
+          </div>
+          No bottles match yet. Scan one to get started.
+        </div>
       )}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {visible.map((b) => (
@@ -522,9 +718,9 @@ function CellarTab({ bottles, onUpdate, onDelete }) {
 function BottleCard({ bottle, onUpdate, onDelete }) {
   const [open, setOpen] = useState(false);
   return (
-    <div style={{
-      background: COLORS.paperDim, border: `1px solid ${COLORS.line}`, borderRadius: 10,
-      padding: 14, transform: `rotate(${bottle.id ? (bottle.id.charCodeAt(0) % 3 - 1) * 0.15 : 0}deg)`,
+    <div className="card-surface" style={{
+      background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 14,
+      padding: 16, boxShadow: "0 2px 8px rgba(34,16,22,0.05)",
     }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
@@ -543,11 +739,11 @@ function BottleCard({ bottle, onUpdate, onDelete }) {
       <div style={{ fontSize: 13, color: COLORS.inkSoft, marginTop: 6 }}>
         {[bottle.varietal, bottle.region].filter(Boolean).join(" · ")}
       </div>
-      <button onClick={() => setOpen(!open)} style={{ background: "none", border: "none", color: COLORS.wine, fontSize: 13, marginTop: 8, cursor: "pointer", padding: 0 }}>
-        {open ? "Hide details" : "Details"}
+      <button onClick={() => setOpen(!open)} className="link-underline" style={{ marginTop: 10, fontSize: 13 }}>
+        {open ? "Hide details ↑" : "Details ↓"}
       </button>
       {open && (
-        <div style={{ marginTop: 10, fontSize: 14 }}>
+        <div style={{ marginTop: 10, fontSize: 14, borderTop: `1px solid ${COLORS.line}`, paddingTop: 10 }}>
           {bottle.tastingNotes && <p style={{ margin: "0 0 8px" }}>{bottle.tastingNotes}</p>}
           {bottle.priceRange && <p style={{ margin: "0 0 8px", color: COLORS.inkSoft }}>Typical price: {bottle.priceRange}</p>}
           {bottle.instagramHandle && (
@@ -557,13 +753,13 @@ function BottleCard({ bottle, onUpdate, onDelete }) {
               </a>
             </p>
           )}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
             {bottle.status !== "drunk" && (
-              <button onClick={() => onUpdate(bottle.id, { status: "drunk" })} style={smallButtonStyle}>
+              <button onClick={() => onUpdate(bottle.id, { status: "drunk" })} className="btn-ghost small">
                 Mark as drunk
               </button>
             )}
-            <button onClick={() => onDelete(bottle.id)} style={{ ...smallButtonStyle, color: COLORS.wineDark, borderColor: COLORS.wineDark }}>
+            <button onClick={() => onDelete(bottle.id)} className="btn-ghost small danger">
               Remove
             </button>
           </div>
@@ -579,13 +775,16 @@ function RatingsTab({ bottles, onUpdate }) {
     <div>
       <SectionTitle>Ratings · {drunk.length} drunk</SectionTitle>
       {drunk.length === 0 && (
-        <p style={{ color: COLORS.inkSoft, fontSize: 14 }}>
+        <div className="empty-state">
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
+            <BottleRating value={0} readOnly />
+          </div>
           Nothing to rate yet — mark a bottle "drunk" from the Cellar tab first.
-        </p>
+        </div>
       )}
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {drunk.map((b) => (
-          <div key={b.id} style={{ background: COLORS.paperDim, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: 14 }}>
+          <div key={b.id} className="card-surface" style={{ background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: 16, boxShadow: "0 2px 8px rgba(34,16,22,0.05)" }}>
             <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 600, fontSize: 17 }}>
               {b.wineName || "Unnamed wine"}
             </div>
@@ -594,6 +793,7 @@ function RatingsTab({ bottles, onUpdate }) {
             </div>
             <BottleRating value={b.rating || 0} onChange={(n) => onUpdate(b.id, { rating: n })} />
             <textarea
+              className="field"
               placeholder="Notes on this bottle…"
               value={b.ratingNotes || ""}
               onChange={(e) => onUpdate(b.id, { ratingNotes: e.target.value })}
@@ -607,9 +807,7 @@ function RatingsTab({ bottles, onUpdate }) {
   );
 }
 
-function SuggestionsTab({ bottles }) {
-  const [status, setStatus] = useState("idle");
-  const [suggestions, setSuggestions] = useState([]);
+function SuggestionsTab({ bottles, suggestions, setSuggestions, status, setStatus }) {
   const rated = bottles.filter((b) => b.rating >= 4);
 
   async function getSuggestions() {
@@ -631,13 +829,13 @@ function SuggestionsTab({ bottles }) {
           Rate a few bottles 4 or 5 to get suggestions tuned to your taste — or get general natural wine picks now.
         </p>
       )}
-      <button onClick={getSuggestions} disabled={status === "loading"} style={primaryButtonStyle}>
+      <button onClick={getSuggestions} disabled={status === "loading"} className="btn-primary">
         {status === "loading" ? "Thinking…" : "Get suggestions"}
       </button>
       {status === "error" && <p style={{ color: COLORS.wineDark, fontSize: 14, marginTop: 10 }}>Couldn't fetch suggestions — try again.</p>}
       <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 16 }}>
         {suggestions.map((s, i) => (
-          <div key={i} style={{ background: COLORS.paperDim, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: 14 }}>
+          <div key={i} className="card-surface" style={{ background: COLORS.cream, border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: 16, boxShadow: "0 2px 8px rgba(34,16,22,0.05)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 600, fontSize: 17 }}>
                 {s.wineName}
@@ -665,15 +863,7 @@ function SectionTitle({ children, small }) {
 
 const labelStyle = { display: "block", fontSize: 12, color: COLORS.inkSoft, marginBottom: 4, fontFamily: "'JetBrains Mono', monospace" };
 const inputStyle = {
-  width: "100%", boxSizing: "border-box", padding: "9px 10px", borderRadius: 6,
+  width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: 8,
   border: `1px solid ${COLORS.line}`, fontSize: 14, fontFamily: "'Inter', sans-serif",
   background: "#fff", color: COLORS.ink,
-};
-const primaryButtonStyle = {
-  background: COLORS.wine, color: COLORS.paper, border: "none", borderRadius: 8,
-  padding: "10px 18px", fontSize: 14, fontWeight: 600, cursor: "pointer",
-};
-const smallButtonStyle = {
-  background: "none", border: `1px solid ${COLORS.wine}`, color: COLORS.wine,
-  borderRadius: 6, padding: "5px 10px", fontSize: 13, cursor: "pointer",
 };
