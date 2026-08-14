@@ -66,7 +66,13 @@ Respond with ONLY a JSON object, no markdown fences: {"photoUrl":""} (empty stri
     const parsed = extractJSON(text);
     if (!parsed) console.error("Could not parse /bottle-image response. Raw text was:\n", text);
     const url = parsed && typeof parsed.photoUrl === "string" ? parsed.photoUrl.trim() : "";
-    res.json({ photoUrl: /^https?:\/\//i.test(url) ? url : "" });
+    const validUrl = /^https?:\/\//i.test(url) ? url : "";
+    if (!validUrl) {
+      console.log(
+        `bottle-image: no photo for "${label}". Block types: ${blocks.map((b) => b.type).join(", ")}. Raw text:\n${text}`
+      );
+    }
+    res.json({ photoUrl: validUrl });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Bottle image lookup failed." });
